@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>SynapseMigrate · Workspace</title>
+  <link rel="stylesheet" href="/dashboard/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="SynapseMigrate home">
+        <span class="brand-mark">S</span><span>Synapse<span class="brand-light">Migrate</span><small>DATA WORKSPACE</small></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="overview"><span>▦</span> Overview</button>
+        <button class="nav-item" data-view="connections"><span>⛓</span> Connections</button>
+        <button class="nav-item" data-view="projects"><span>◇</span> Schema projects</button>
+        <button class="nav-item" data-view="jobs"><span>↗</span> Migration jobs</button>
+        <button class="nav-item" data-view="database-browser"><span>▤</span> Database browser</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="api-indicator"><span id="api-dot" class="status-dot"></span><div><strong id="api-status">Checking API…</strong><small>SynapseMigrate service</small></div></div>
+        <button id="settings-open" class="settings-button">⚙ &nbsp; API settings</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong id="breadcrumb-current">Overview</strong></div><div class="topbar-right"><span class="environment-pill">LOCAL WORKSPACE</span><button class="avatar" aria-label="Local user">S</button></div></header>
+      <section class="content">
+        <div id="toast-region" aria-live="polite"></div>
+        <section id="view-overview" class="view active-view">
+          <div class="page-heading"><div><div class="eyebrow">MIGRATION WORKSPACE</div><h1>Good to see you.</h1><p>Analyze a source, review its structure, and prepare a migration plan.</p></div><button id="refresh-overview" class="button button-secondary">↻ &nbsp; Refresh</button></div>
+          <div class="metric-grid">
+            <article class="metric-card"><div class="metric-icon icon-blue">⛓</div><span>Connections</span><strong id="metric-connections">—</strong><small>Saved endpoints</small></article>
+            <article class="metric-card"><div class="metric-icon icon-violet">◇</div><span>Schema projects</span><strong id="metric-projects">—</strong><small>Analyzed schemas</small></article>
+            <article class="metric-card"><div class="metric-icon icon-amber">↗</div><span>Migration jobs</span><strong id="metric-jobs">—</strong><small>Recent executions</small></article>
+          </div>
+          <div class="dashboard-grid">
+            <article class="panel getting-started"><div class="panel-heading"><div><div class="eyebrow">QUICK START</div><h2>Start with a source</h2></div><span class="step-number">01</span></div><p>Use the bundled SQLite shop database to explore the dashboard without configuring a database server.</p><div class="demo-info"><span class="demo-icon">▤</span><div><strong>Bundled SQLite sample</strong><small>5 tables · sample records · composite keys</small></div><span class="demo-badge">LOCAL FILE</span></div><button id="connect-demo" class="button button-primary full-width">Connect SQLite demo <span>→</span></button><div class="helper-text">This registers a source connection; it does not start a migration or write to another database.</div></article>
+            <article class="panel flow-panel"><div class="panel-heading"><div><div class="eyebrow">WORKFLOW</div><h2>From schema to migration</h2></div></div><div class="flow-list"><div class="flow-step"><span class="flow-number">1</span><div><strong>Connect a source</strong><small>SQLite, MySQL, PostgreSQL, or MongoDB</small></div></div><div class="flow-line"></div><div class="flow-step"><span class="flow-number">2</span><div><strong>Analyze and review</strong><small>Inspect the inferred schema and relationships</small></div></div><div class="flow-line"></div><div class="flow-step"><span class="flow-number">3</span><div><strong>Prepare a plan</strong><small>Choose an allowed destination engine</small></div></div><div class="flow-line"></div><div class="flow-step"><span class="flow-number">4</span><div><strong>Run when ready</strong><small>A live target connection is needed for data writes</small></div></div></div></article>
+          </div>
+          <article class="panel table-panel"><div class="panel-heading"><div><div class="eyebrow">RECENT ACTIVITY</div><h2>Latest schema projects</h2></div><button class="text-button" data-go="projects">View all →</button></div><div id="overview-projects" class="empty-state compact-empty">No projects yet. Connect a source and analyze its schema.</div></article>
+        </section>
+
+        <section id="view-connections" class="view">
+          <div class="page-heading"><div><div class="eyebrow">DATA SOURCES & TARGETS</div><h1>Connections</h1><p>Register endpoints. Opening this page or refreshing tests reachability; status shows the last check.</p></div><button id="connection-refresh" class="button button-secondary">↻ &nbsp; Refresh</button></div>
+          <div class="panel demo-banner"><div class="demo-info"><span class="demo-icon">▤</span><div><strong>Try the bundled SQLite source</strong><small>Uses the local file demo/synapsemigrate_demo.db</small></div></div><button id="connect-demo-secondary" class="button button-primary">Connect demo</button></div>
+          <div class="panel"><div class="panel-heading"><div><div class="eyebrow">SAVED ENDPOINTS</div><h2>Your connections</h2></div><button id="new-connection-open" class="button button-primary">＋ Add connection</button></div><div id="connections-list" class="empty-state">Loading connections…</div></div>
+          <p class="section-note">SQLite can be used as a source for schema analysis and plan generation. Migration execution requires a supported, reachable target server.</p>
+        </section>
+
+        <section id="view-projects" class="view">
+          <div class="page-heading"><div><div class="eyebrow">SCHEMA EXPLORER</div><h1>Schema projects</h1><p>Analyze a connected source and review the resulting schema model.</p></div><button id="analyze-open" class="button button-primary">＋ Analyze source</button></div>
+          <div class="panel"><div class="panel-heading"><div><div class="eyebrow">ANALYSIS HISTORY</div><h2>Projects</h2></div><button id="projects-refresh" class="button button-secondary">↻ &nbsp; Refresh</button></div><div id="projects-list" class="empty-state">Loading projects…</div></div>
+          <div id="project-detail" class="panel hidden"></div>
+        </section>
+
+        <section id="view-jobs" class="view">
+          <div class="page-heading"><div><div class="eyebrow">EXECUTION MONITOR</div><h1>Migration jobs</h1><p>Track status and progress for queued, running, or completed migrations.</p></div><button id="jobs-refresh" class="button button-secondary">↻ &nbsp; Refresh</button></div>
+          <div class="panel"><div class="panel-heading"><div><div class="eyebrow">JOB HISTORY</div><h2>Recent jobs</h2></div></div><div id="jobs-list" class="empty-state">Loading jobs…</div></div>
+        </section>
+
+        <section id="view-database-browser" class="view">
+          <div class="page-heading"><div><div class="eyebrow">READ-ONLY EXPLORER</div><h1>Database browser</h1><p>Browse tables, views, and collections using saved connections. This screen does not write data.</p></div><button id="database-browser-refresh" class="button button-secondary">↻ &nbsp; Refresh</button></div>
+          <div id="database-browser-notice" class="section-note"></div>
+          <div class="browser-layout"><div class="panel"><div class="panel-heading"><div><div class="eyebrow">SAVED DATABASES</div><h2>Databases</h2></div></div><div id="database-browser-list" class="empty-state">Loading databases…</div></div>
+            <div class="panel"><div class="panel-heading"><div><div class="eyebrow">CONTENTS</div><h2 id="database-browser-title">Select a database</h2></div></div><div id="database-browser-objects" class="empty-state">Choose a database to view its tables or collections.</div><div id="database-browser-sample"></div></div></div>
+        </section>
+
+        <footer class="page-footer"><span>SynapseMigrate</span><span>Built for safe, reviewable data migration</span></footer>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="settings-dialog" class="modal"><form method="dialog" class="modal-close-form"><button class="icon-button" aria-label="Close">×</button></form><div class="eyebrow">WORKSPACE SETUP</div><h2>API settings</h2><p>Credentials are kept in this browser's local storage and sent as a bearer token.</p><label>API base URL<input id="api-url" type="url" placeholder="http://localhost:8000/api"></label><label>API token<input id="api-token" type="password" placeholder="dev-token" autocomplete="off"></label><div class="modal-actions"><button id="settings-cancel" class="button button-secondary">Cancel</button><button id="settings-save" class="button button-primary">Save settings</button></div></dialog>
+
+  <dialog id="connection-dialog" class="modal modal-wide"><form method="dialog" class="modal-close-form"><button class="icon-button" aria-label="Close">×</button></form><div class="eyebrow">NEW ENDPOINT</div><h2>Add a connection</h2><p>Verify credentials before saving them for schema analysis or migration use.</p><form id="connection-form" class="form-grid">
+    <label>Database engine<select id="connection-engine"><option value="sqlite">SQLite</option><option value="mysql">MySQL</option><option value="postgresql">PostgreSQL</option><option value="mongodb">MongoDB</option></select></label>
+    <label>Connection role<select id="connection-role"><option value="source">Source</option><option value="target">Target</option></select></label>
+    <label class="span-two">Connection name (optional)<input id="connection-name" placeholder="Local MongoDB target"></label>
+    <label id="field-database" class="span-two">Database name (required)<input id="connection-database" placeholder="shop"><small>For MongoDB, enter the database separately from the URI; for SQL, enter the database to connect to.</small></label>
+    <label id="field-sqlite-path" class="span-two hidden">SQLite database file<input id="connection-path" placeholder="/path/to/database.db"></label>
+    <label id="field-host">Host<input id="connection-host" placeholder="localhost"></label><label id="field-port">Port<input id="connection-port" type="number" placeholder="3306"></label>
+    <label id="field-user">Username<input id="connection-user" autocomplete="username"></label><label id="field-password">Password<input id="connection-password" type="password" autocomplete="new-password"></label>
+    <label id="field-uri" class="span-two hidden">MongoDB URI<input id="connection-uri" type="password" placeholder="mongodb://host:27017/?replicaSet=rs0"></label>
+    <div id="connection-form-error" class="form-error hidden span-two" role="alert"></div>
+    <div class="span-two modal-actions"><button id="connection-cancel" type="button" class="button button-secondary">Cancel</button><button class="button button-primary" type="submit">Verify and save</button></div>
+  </form></dialog>
+
+  <dialog id="analyze-dialog" class="modal"><form method="dialog" class="modal-close-form"><button class="icon-button" aria-label="Close">×</button></form><div class="eyebrow">SCHEMA ANALYSIS</div><h2>Analyze a source</h2><p>Choose a saved source connection. Analysis reads schema metadata and creates a reviewable project.</p><form id="analyze-form"><label>Source connection<select id="analysis-source" required></select></label><div class="modal-actions"><button id="analyze-cancel" type="button" class="button button-secondary">Cancel</button><button class="button button-primary" type="submit">Analyze schema</button></div></form></dialog>
+
+  <dialog id="plan-dialog" class="modal"><form method="dialog" class="modal-close-form"><button class="icon-button" aria-label="Close">×</button></form><div class="eyebrow">PLAN GENERATION</div><h2>Prepare a migration plan</h2><p>The target engine must match the analyzed source direction. Connect an actual target later to run data writes.</p><form id="plan-form"><input id="plan-project-id" type="hidden"><label>Target engine<select id="plan-target-engine"></select></label><label>Batch size<input id="plan-batch-size" type="number" value="250" min="1" max="10000"></label><label class="span-two">Migration destination<select id="plan-target-connection"><option value="">Choose a saved target connection…</option></select><small>This selects where a real migration will write data. You can change it before starting.</small></label><div class="modal-actions"><button id="plan-cancel" type="button" class="button button-secondary">Cancel</button><button class="button button-primary" type="submit">Generate plan</button></div></form></dialog>
+
+  <script type="module" src="/dashboard/js/app.js"></script>
+</body>
+</html>

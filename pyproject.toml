@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synapsemigrate"
+version = "2.0.0"
+description = "Bi-directional relational/document schema compiler and resumable migration engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "SynapseMigrate contributors" }]
+dependencies = [
+  "pydantic>=2.7,<3",
+  "fastapi>=0.111,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "sqlalchemy>=2.0,<3",
+  "pymongo>=4.7,<5",
+  "redis>=5,<7",
+  "cryptography>=42,<46",
+  "jinja2>=3.1,<4",
+  "jsonschema>=4.22,<5",
+  "prometheus-client>=0.20,<1",
+  "requests>=2.32,<3",
+  "typer>=0.12,<1",
+]
+
+[project.optional-dependencies]
+mysql = ["pymysql>=1.1,<2"]
+postgresql = ["psycopg[binary]>=3.2,<4"]
+test = ["pytest>=8,<10", "pytest-cov>=5,<7", "hypothesis>=6.108,<7", "httpx2>=1,<3"]
+
+[project.scripts]
+synapse = "synapse.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["synapse*"]
+
+[tool.setuptools.package-data]
+synapse = ["adapters/emitters/templates/*.j2"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.coverage.run]
+branch = true
+source = ["synapse"]

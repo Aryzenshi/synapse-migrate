@@ -1,0 +1,7 @@
+[
+  {"_id":{"$oid":"65f0aa000000000000000001"},"email":"aarya.n@example.com","address":{"city":"Chennai","line1":"12 MG Road","pincode":"600001"},"loyalty":{"tier":"GOLD","points":1840},"orders":[{"sku":"SKU-1042","qty":2,"unit_price":{"$numberDecimal":"499.00"}},{"sku":"SKU-31","qty":1,"unit_price":{"$numberDecimal":"0.00"}}],"tag_ids":[{"$oid":"65f0aa000000000000000010"},{"$oid":"65f0aa000000000000000011"}],"metadata":{"source":"mobile","ab":[1,2]},"created_at":{"$date":"2026-08-01T00:00:00Z"}},
+  {"_id":{"$oid":"65f0aa000000000000000002"},"email":"dev.k@example.com","address":{"city":"Vellore","line1":"4 Katpadi Road","pincode":"632014"},"loyalty":null,"orders":[{"sku":"SKU-4","qty":1,"unit_price":{"$numberDecimal":"100.00"}}],"tag_ids":[{"$oid":"65f0aa000000000000000010"}],"metadata":{"source":"web"},"created_at":{"$date":"2026-08-02T00:00:00Z"}},
+  {"_id":{"$oid":"65f0aa000000000000000003"},"email":"mira.r@example.com","address":null,"loyalty":{"tier":"SILVER","points":220},"orders":[],"tag_ids":[],"metadata":{},"created_at":{"$date":"2026-08-03T00:00:00Z"}},
+  {"_id":{"$oid":"65f0aa000000000000000010"},"name":"sale"},
+  {"_id":{"$oid":"65f0aa000000000000000011"},"name":"featured"}
+]

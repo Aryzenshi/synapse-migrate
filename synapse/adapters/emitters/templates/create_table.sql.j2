@@ -1,0 +1,4 @@
+CREATE TABLE {{ table_q }} (
+{% for column in columns %}  {{ column }}{{ "," if not loop.last or primary_key else "" }}
+{% endfor %}{% if primary_key %}  PRIMARY KEY ({{ primary_key }})
+{% endif %}){% if mysql %} ENGINE={{ engine }} DEFAULT CHARSET={{ charset }} COLLATE={{ collation }}{% endif %};

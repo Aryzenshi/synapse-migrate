@@ -1,0 +1,136 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    ports: ["6379:6379"]
+    volumes: ["redis_data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: devroot
+      MYSQL_DATABASE: shop
+      MYSQL_USER: synapse
+      MYSQL_PASSWORD: devpassword
+    ports: ["3306:3306"]
+    command: ["--default-authentication-plugin=mysql_native_password", "--sql-mode=STRICT_ALL_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO"]
+    volumes: ["mysql_data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pdevroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  mysql-seed:
+    image: mysql:8.4
+    environment:
+      SYNAPSE_DEMO_SEED: ${SYNAPSE_DEMO_SEED:-true}
+    entrypoint: ["sh", "-c"]
+    command: ["if [ \"$$SYNAPSE_DEMO_SEED\" = \"true\" ]; then mysql --host=mysql --user=root --password=devroot shop < /fixtures/mysql_sample.sql; else echo 'Demo SQL seed disabled'; fi"]
+    volumes: ["./tests/fixtures/mysql_sample.sql:/fixtures/mysql_sample.sql:ro"]
+    depends_on:
+      mysql: { condition: service_healthy }
+    restart: "no"
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: devpassword
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U synapse -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27017:27017"]
+    # No named data volume: a newly created demo container starts with clean data.
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ping:1}).ok' | grep 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  mongo-init:
+    image: mongo:7
+    entrypoint: ["mongosh", "--host", "mongo:27017", "--quiet", "--eval"]
+    command: ["try { rs.status(); } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}); }"]
+    depends_on:
+      mongo: { condition: service_healthy }
+    restart: "no"
+  mongo-seed:
+    image: mongo:7
+    environment:
+      SYNAPSE_DEMO_SEED: ${SYNAPSE_DEMO_SEED:-true}
+    entrypoint: ["sh", "-c"]
+    command: ["if [ \"$$SYNAPSE_DEMO_SEED\" = \"true\" ]; then exec mongosh --host mongo:27017 --quiet --file /fixtures/seed_mongo.js; else echo 'Demo MongoDB seed disabled'; fi"]
+    volumes:
+      - ./tests/fixtures/mongo_sample.json:/fixtures/mongo_sample.json:ro
+      - ./scripts/seed_mongo.js:/fixtures/seed_mongo.js:ro
+    depends_on:
+      mongo-init: { condition: service_completed_successfully }
+    restart: "no"
+  api:
+    build: .
+    command: ["uvicorn", "synapse.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      SYNAPSE_STATE_DIR: /var/lib/synapse/state
+      SYNAPSE_JOB_DIR: /var/lib/synapse/jobs
+      REDIS_URL: redis://redis:6379/0
+      SYNAPSE_MASTER_KEY: ${SYNAPSE_MASTER_KEY:-development-only-change-this-key}
+      SYNAPSE_API_KEYS: ${SYNAPSE_API_KEYS:-dev-token:admin}
+      SYNAPSE_DEV_MODE: "true"
+      PYTHONPATH: /app
+    ports: ["8000:8000"]
+    volumes: ["synapse_state:/var/lib/synapse"]
+    depends_on:
+      redis: { condition: service_healthy }
+      mysql: { condition: service_healthy }
+      mysql-seed: { condition: service_completed_successfully }
+      mongo-seed: { condition: service_completed_successfully }
+  worker:
+    build: .
+    command: ["python", "-m", "synapse.workers.tasks"]
+    environment:
+      SYNAPSE_STATE_DIR: /var/lib/synapse/state
+      SYNAPSE_JOB_DIR: /var/lib/synapse/jobs
+      REDIS_URL: redis://redis:6379/0
+      SYNAPSE_MASTER_KEY: ${SYNAPSE_MASTER_KEY:-development-only-change-this-key}
+      SYNAPSE_API_KEYS: ${SYNAPSE_API_KEYS:-dev-token:admin}
+      PYTHONPATH: /app
+    volumes: ["synapse_state:/var/lib/synapse"]
+    depends_on:
+      redis: { condition: service_healthy }
+      mysql: { condition: service_healthy }
+      mysql-seed: { condition: service_completed_successfully }
+      mongo-seed: { condition: service_completed_successfully }
+  ui:
+    build: .
+    command: ["uvicorn", "synapse.api.main:app", "--host", "0.0.0.0", "--port", "8501"]
+    environment:
+      SYNAPSE_STATE_DIR: /var/lib/synapse/state
+      SYNAPSE_JOB_DIR: /var/lib/synapse/jobs
+      REDIS_URL: redis://redis:6379/0
+      SYNAPSE_MASTER_KEY: ${SYNAPSE_MASTER_KEY:-development-only-change-this-key}
+      SYNAPSE_API_KEYS: ${SYNAPSE_API_KEYS:-dev-token:admin}
+      SYNAPSE_DEV_MODE: "true"
+      SYNAPSE_DEMO_SQLITE_PATH: /app/demo/synapsemigrate_demo.db
+      PYTHONPATH: /app
+    ports: ["8501:8501"]
+    volumes: ["synapse_state:/var/lib/synapse"]
+    depends_on:
+      redis: { condition: service_healthy }
+      mysql: { condition: service_healthy }
+      mysql-seed: { condition: service_completed_successfully }
+      mongo-seed: { condition: service_completed_successfully }
+volumes:
+  redis_data:
+  mysql_data:
+  postgres_data:
+  synapse_state:

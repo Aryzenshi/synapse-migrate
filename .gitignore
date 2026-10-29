@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.synapse-state/
+.synapse-jobs/
+var/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+migration_errors.log
